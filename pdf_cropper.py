@@ -15,7 +15,7 @@ import sys
 import os
 
 class PDFCropper:
-    def __init__(self, input_pdf_path, rotate_covers=True):
+    def __init__(self, input_pdf_path, rotate_covers=False):
         self.input_pdf_path = input_pdf_path
         self.rotate_covers = rotate_covers  # 是否旋转封面封底
         self.reader = PdfReader(input_pdf_path)
