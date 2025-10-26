@@ -15,8 +15,9 @@ import sys
 import os
 
 class PDFCropper:
-    def __init__(self, input_pdf_path):
+    def __init__(self, input_pdf_path, rotate_covers=True):
         self.input_pdf_path = input_pdf_path
+        self.rotate_covers = rotate_covers  # 是否旋转封面封底
         self.reader = PdfReader(input_pdf_path)
         self.writer = PdfWriter()
         
@@ -52,7 +53,6 @@ class PDFCropper:
         right_page.cropbox.lower_left = (width / 2, 0)
         
         return [left_page, right_page]
-        return [left_page, right_page]
     
     def process_pdf(self):
         """处理PDF文件"""
@@ -67,7 +67,8 @@ class PDFCropper:
         # 处理封面（第一页）
         print("处理封面...")
         cover_page = self.reader.pages[0]
-        cover_page = self.rotate_to_portrait(cover_page)
+        if self.rotate_covers:
+            cover_page = self.rotate_to_portrait(cover_page)
         self.writer.add_page(cover_page)
         
         # 处理正文页（中间所有页）
@@ -87,7 +88,8 @@ class PDFCropper:
         # 处理封底（最后一页）
         print("处理封底...")
         back_cover_page = self.reader.pages[total_pages - 1]
-        back_cover_page = self.rotate_to_portrait(back_cover_page)
+        if self.rotate_covers:
+            back_cover_page = self.rotate_to_portrait(back_cover_page)
         self.writer.add_page(back_cover_page)
         
         print("PDF处理完成！")

@@ -173,7 +173,7 @@
         <div class="instructions">
             <h3>功能说明：</h3>
             <ul>
-                <li>第一页和最后一页作为封面，转为纵版</li>
+                <li>第一页和最后一页作为封面（可选择是否转为纵版）</li>
                 <li>正文横版双页排版自动裁剪为两页</li>
                 <li>按正确顺序输出新PDF</li>
                 <li>支持最大16MB的PDF文件</li>
@@ -187,6 +187,14 @@
                 <h3>点击选择PDF文件或拖拽到此处</h3>
                 <p>支持 .pdf 格式文件</p>
                 <input type="file" name="file" class="file-input" id="fileInput" accept=".pdf" required>
+            </div>
+            <!-- 处理选项 -->
+            <div class="options-section" style="margin: 20px 0; text-align: left;">
+                <h3 style="color: #333; margin-bottom: 15px;">处理选项：</h3>
+                <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                    <input type="checkbox" name="rotate_covers" value="true" checked style="margin-right: 10px;">
+                    <span>将封面和封底转为纵版（如果封面封底已经是纵版，请取消勾选）</span>
+                </label>
             </div>
             
             <!-- 文件信息显示 -->

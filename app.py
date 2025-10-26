@@ -63,8 +63,11 @@ def upload_file():
         file.save(input_path)
         
         try:
+            # 获取旋转选项（默认为True）
+            rotate_covers = request.form.get('rotate_covers', 'true').lower() == 'true'
+            
             # 处理PDF
-            cropper = PDFCropper(input_path)
+            cropper = PDFCropper(input_path, rotate_covers=rotate_covers)
             cropper.process_pdf()
             cropper.save_output(output_path)
             
