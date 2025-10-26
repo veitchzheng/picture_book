@@ -39,10 +39,32 @@ check_status() {
 stop_service() {
     echo -e "${YELLOW}正在停止 $APP_NAME...${NC}"
     
-    # 查找并杀死相关进程
+    # 首先尝试使用PID文件停止
+    if [ -f "app.pid" ]; then
+        APP_PID=$(cat app.pid)
+        if ps -p $APP_PID > /dev/null 2>&1; then
+            echo "找到进程PID: $APP_PID"
+            kill $APP_PID
+            sleep 2
+            
+            # 检查是否成功停止
+            if ps -p $APP_PID > /dev/null 2>&1; then
+                echo "强制终止进程..."
+                kill -9 $APP_PID
+            fi
+            
+            rm -f app.pid
+            echo -e "${GREEN}✓ 服务已停止${NC}"
+            return 0
+        else
+            rm -f app.pid
+        fi
+    fi
+    
+    # 如果PID文件不存在或无效，使用端口查找
     PIDS=$(lsof -ti :$PORT)
     if [ -n "$PIDS" ]; then
-        echo "找到进程: $PIDS"
+        echo "通过端口找到进程: $PIDS"
         kill $PIDS
         sleep 2
         
@@ -52,6 +74,7 @@ stop_service() {
             kill -9 $(lsof -ti :$PORT) 2>/dev/null
         fi
         
+        rm -f app.pid
         echo -e "${GREEN}✓ 服务已停止${NC}"
     else
         echo -e "${YELLOW}⚠ 未找到运行中的服务${NC}"
@@ -131,11 +154,15 @@ start_service() {
     echo "正在启动PDF小册子裁剪工具..."
     echo
     echo "访问地址: http://localhost:$PORT"
-    echo "按 Ctrl+C 停止服务"
+    echo "使用 '$0 stop' 停止服务"
     echo
 
-    # 启动Flask应用
-    python3 app.py
+    # 启动Flask应用（后台执行）
+    nohup python3 app.py > app.log 2>&1 &
+    APP_PID=$!
+    echo $APP_PID > app.pid
+    echo -e "${GREEN}✓ 服务已启动 (PID: $APP_PID)${NC}"
+    echo -e "${BLUE}日志文件: app.log${NC}"
 }
 
 # 重启服务

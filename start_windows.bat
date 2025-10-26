@@ -46,10 +46,24 @@ exit /b 0
 :stop_service
 echo 正在停止 %APP_NAME%...
 
-REM 查找并杀死相关进程
+REM 首先尝试使用PID文件停止
+if exist app.pid (
+    set /p PID=<app.pid
+    tasklist /FI "PID eq !PID!" 2>nul | findstr /I !PID! >nul
+    if not errorlevel 1 (
+        echo 找到进程PID: !PID!
+        taskkill /PID !PID! /F >nul 2>&1
+        del app.pid
+        echo ✓ 服务已停止
+    ) else (
+        del app.pid
+    )
+)
+
+REM 如果PID文件不存在或无效，使用端口查找
 for /f "tokens=5" %%i in ('netstat -ano ^| findstr ":%PORT%"') do (
     set PID=%%i
-    echo 找到进程PID: !PID!
+    echo 通过端口找到进程PID: !PID!
     taskkill /PID !PID! /F >nul 2>&1
 )
 
@@ -64,6 +78,7 @@ if errorlevel 1 (
     )
     echo ✓ 服务已强制停止
 )
+del app.pid 2>nul
 pause
 exit /b 0
 
@@ -156,11 +171,17 @@ if not exist "processed" mkdir processed
 echo 正在启动PDF小册子裁剪工具...
 echo.
 echo 访问地址: http://localhost:%PORT%
-echo 按 Ctrl+C 停止服务
+echo 使用 %0 stop 停止服务
 echo.
 
-REM 启动Flask应用
-python app.py
+REM 启动Flask应用（后台执行）
+start /B python app.py > app.log 2>&1
+for /f "tokens=2" %%i in ('netstat -ano ^| findstr ":%PORT%"') do (
+    set PID=%%i
+)
+echo !PID! > app.pid
+echo ✓ 服务已启动 (PID: !PID!)
+echo 日志文件: app.log
 
 pause
 exit /b 0
